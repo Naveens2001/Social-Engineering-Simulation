@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Cybersecurity Awareness Games — learn how cyber attacks work through interactive stories." />
+  <title>Cybersecurity Awareness Games</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <div class="app" id="app">
+    <header class="topbar" aria-label="Game header">
+      <div class="topbar__left">
+        <div class="brand">
+          <div class="brand__title">CYBER AWARENESS</div>
+          <div class="brand__subtitle">Interactive security training platform</div>
+        </div>
+      </div>
+      <div class="topbar__right">
+        <button class="btn btn--ghost" id="uiResetBtn" type="button" title="Reset all progress">Reset Progress</button>
+      </div>
+    </header>
+
+    <main class="menu-stage">
+      <div class="scanlines" aria-hidden="true"></div>
+
+      <div class="menu-hero">
+        <h1 class="menu-title">Cybersecurity Awareness Games</h1>
+        <p class="menu-subtitle">Learn how cyber attacks work through interactive stories.<br>Choose a scenario.</p>
+      </div>
+
+      <div class="level-grid" id="levelGrid">
+        <!-- Level cards rendered by JS -->
+      </div>
+    </main>
+
+    <footer class="controls" style="justify-content:center;">
+      <div class="hint" style="text-align:center;">Play any scenario to learn about different cybersecurity threats.
+        Your progress is saved automatically.</div>
+    </footer>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const LEVELS = [
+        { key: "level1", num: 1, icon: "🎣", name: "Phishing", desc: "Fake emails designed to steal login credentials.", link: "phishing.html", storageKey: "phishing_complete" },
+        { key: "level2", num: 2, icon: "🖱️", name: "Clickjacking", desc: "Hidden elements trick users into clicking something they never intended.", link: "clickjacking.html", storageKey: "clickjacking_complete" },
+        { key: "level3", num: 3, icon: "📱", name: "Smishing", desc: "SMS messages pretending to be banks, delivery services, or government alerts.", link: "smishing.html", storageKey: "smishing_complete" },
+        { key: "level4", num: 4, icon: "💾", name: "Baiting", desc: "Attackers leave infected USB drives or downloads to lure victims.", link: "baiting.html", storageKey: "baiting_complete" },
+        { key: "level5", num: 5, icon: "⚠", name: "Scareware", desc: "Fake security warnings trick users into installing malicious software.", link: "scareware.html", storageKey: "scareware_complete" },
+        { key: "level6", num: 6, icon: "📰", name: "Watering Hole", desc: "Attackers infect websites frequently visited by a target group.", link: "wateringhole.html", storageKey: "wateringhole_complete" },
+        { key: "level7", num: 7, icon: "👔", name: "BEC Attack", desc: "Attackers impersonate executives to trick employees into sending money or data.", link: "bec.html", storageKey: "bec_complete" },
+        { key: "level8", num: 8, icon: "🚪", name: "Tailgating", desc: "Attackers gain physical access by following authorized employees into restricted areas.", link: "tailgating.html", storageKey: "tailgating_complete" },
+      ];
+
+      function getLevels() {
+        try { return JSON.parse(localStorage.getItem("cyberLevels") || "{}"); } catch (e) { return {}; }
+      }
+
+      function renderMenu() {
+        const saved = getLevels();
+        const grid = document.getElementById("levelGrid");
+        grid.innerHTML = "";
+
+        LEVELS.forEach((lvl, idx) => {
+          const complete = !!saved[lvl.key] || (lvl.storageKey ? localStorage.getItem(lvl.storageKey) === "true" : false);
+
+          const card = document.createElement("div");
+          card.className = "level-card" + (complete ? " level-card--complete completed" : "");
+
+          card.innerHTML = `
+            <div class="level-card__badge">${complete ? '✔ Complete <span class="completion-mark" aria-hidden="true">✓</span>' : ""}</div>
+            <div class="level-card__icon">${lvl.icon}</div>
+            <div class="level-card__name">${lvl.name}</div>
+            <div class="level-card__desc">${lvl.desc}</div>
+            <a href="${lvl.link}" class="btn btn--primary level-card__btn">${complete ? "Replay" : "Play"}</a>
+          `;
+
+          grid.appendChild(card);
+        });
+      }
+
+      // Reset button
+      document.getElementById("uiResetBtn").addEventListener("click", () => {
+        if (confirm("Reset all level progress? This cannot be undone.")) {
+          localStorage.removeItem("cyberLevels");
+          ["phishing_complete","clickjacking_complete","smishing_complete","baiting_complete","scareware_complete","wateringhole_complete","bec_complete","tailgating_complete"].forEach((k)=>localStorage.removeItem(k));
+          renderMenu();
+        }
+      });
+
+      renderMenu();
+    })();
+  </script>
+</body>
+
+</html>

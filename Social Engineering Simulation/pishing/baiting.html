@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="Interactive baiting awareness story — learn how attackers use USB drives and downloads to lure victims." />
+    <title>Level 4 — Baiting Attack</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <div class="app" id="app">
+        <header class="topbar">
+            <div class="topbar__left">
+                <a href="./index.html" class="btn btn--ghost back-btn">← Menu</a>
+                <div class="brand">
+                    <div class="brand__title">BAITING</div>
+                    <div class="brand__subtitle">Interactive baiting awareness story</div>
+                </div>
+            </div>
+            <div class="topbar__right">
+                <div class="status" aria-live="polite">
+                    <div class="status__label">Scene</div>
+                    <div class="status__value" id="uiSceneLabel">—</div>
+                </div><button class="btn btn--ghost" id="uiRestartBtn" type="button">Restart</button>
+            </div>
+        </header>
+        <main class="stage">
+            <div class="scanlines" aria-hidden="true"></div>
+            <section class="stage__grid">
+                <aside class="char char--user">
+                    <div class="char__card">
+                        <div class="char__name">Alex</div>
+                        <div class="char__sprite"><img class="char__img" src="./support.png" alt="" />
+                            <div class="char__imgFallback char__imgFallback--user"></div>
+                        </div>
+                        <div class="char__tag">Curious employee</div>
+                    </div>
+                    <div class="bubble bubble--user" id="uiUserBubble">
+                        <div class="bubble__name">Alex</div>
+                        <div class="bubble__text" id="uiUserText"></div>
+                    </div>
+                </aside>
+                <section class="panel">
+                    <div class="panel__top">
+                        <div class="panel__title" id="uiPanelTitle">—</div>
+                        <div class="panel__meta" id="uiPanelMeta">—</div>
+                    </div>
+                    <div class="panel__body" id="uiCenter"></div>
+                </section>
+                <aside class="char char--phisher">
+                    <div class="char__card char__card--phisher">
+                        <div class="char__name char__name--phisher">Shadow</div>
+                        <div class="char__sprite"><img class="char__img" src="./hacker.png" alt="" />
+                            <div class="char__imgFallback char__imgFallback--phisher"></div>
+                        </div>
+                        <div class="char__tag char__tag--phisher">The social engineer</div>
+                    </div>
+                    <div class="bubble bubble--phisher" id="uiPhisherBubble">
+                        <div class="bubble__name">Shadow</div>
+                        <div class="bubble__text" id="uiPhisherText"></div>
+                    </div>
+                </aside>
+            </section>
+        </main>
+        <footer class="controls">
+            <div class="controls__left">
+                <div class="hint" id="uiHint">Curiosity can be dangerous.</div>
+            </div>
+            <div class="controls__right">
+                <div class="choices" id="uiChoices"></div><button class="btn btn--primary" id="uiContinueBtn"
+                    type="button">Continue</button><button class="btn btn--primary" id="uiHomeBtn" type="button"
+                    style="display:none;">Game Over</button>
+            </div>
+        </footer>
+
+    </div>
+    <script src="./baiting.js" defer></script>
+</body>
+
+</html>

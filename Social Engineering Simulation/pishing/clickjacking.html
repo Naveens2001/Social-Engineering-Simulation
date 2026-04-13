@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Interactive clickjacking awareness story — learn how hidden elements trick users into unintended clicks." />
+  <title>Level 2 — Clickjacking Attack</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <div class="app" id="app">
+    <header class="topbar" aria-label="Game header">
+      <div class="topbar__left">
+        <a href="./index.html" class="btn btn--ghost back-btn">← Menu</a>
+        <div class="brand">
+          <div class="brand__title">CLICKJACKING</div>
+          <div class="brand__subtitle">Interactive clickjacking awareness story</div>
+        </div>
+      </div>
+      <div class="topbar__right">
+        <div class="status" aria-live="polite">
+          <div class="status__label">Scene</div>
+          <div class="status__value" id="uiSceneLabel">—</div>
+        </div>
+        <button class="btn btn--ghost" id="uiRestartBtn" type="button">Restart</button>
+      </div>
+    </header>
+
+    <main class="stage" aria-label="Story stage">
+      <div class="scanlines" aria-hidden="true"></div>
+      <section class="stage__grid" aria-label="Characters and story panel">
+        <!-- LEFT: Alex -->
+        <aside class="char char--user" aria-label="Alex (user) character">
+          <div class="char__card">
+            <div class="char__name">Alex</div>
+            <div class="char__sprite" aria-hidden="true">
+              <img class="char__img" src="./support.png" alt="" loading="eager" />
+              <div class="char__imgFallback char__imgFallback--user" title="Alex"></div>
+            </div>
+            <div class="char__tag">Everyday internet user</div>
+          </div>
+          <div class="bubble bubble--user" id="uiUserBubble" role="group" aria-label="Alex dialogue">
+            <div class="bubble__name">Alex</div>
+            <div class="bubble__text" id="uiUserText"></div>
+          </div>
+        </aside>
+
+        <!-- CENTER -->
+        <section class="panel" aria-label="Interactive scene panel">
+          <div class="panel__top">
+            <div class="panel__title" id="uiPanelTitle">—</div>
+            <div class="panel__meta" id="uiPanelMeta">—</div>
+          </div>
+          <div class="panel__body" id="uiCenter"></div>
+        </section>
+
+        <!-- RIGHT: Shadow -->
+        <aside class="char char--phisher" aria-label="Shadow (attacker) character">
+          <div class="char__card char__card--phisher">
+            <div class="char__name char__name--phisher">Shadow</div>
+            <div class="char__sprite" aria-hidden="true">
+              <img class="char__img" src="./hacker.png" alt="" loading="eager" />
+              <div class="char__imgFallback char__imgFallback--phisher" title="Shadow"></div>
+            </div>
+            <div class="char__tag char__tag--phisher">The hidden manipulator</div>
+          </div>
+          <div class="bubble bubble--phisher" id="uiPhisherBubble" role="group" aria-label="Shadow dialogue">
+            <div class="bubble__name">Shadow</div>
+            <div class="bubble__text" id="uiPhisherText"></div>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <footer class="controls" aria-label="Controls">
+      <div class="controls__left">
+        <div class="hint" id="uiHint">Think before you click.</div>
+      </div>
+      <div class="controls__right">
+        <div class="choices" id="uiChoices" aria-label="Choices"></div>
+        <button class="btn btn--primary" id="uiContinueBtn" type="button">Continue</button>
+        <button class="btn btn--primary" id="uiHomeBtn" type="button" style="display:none;">Home</button>
+      </div>
+    </footer>
+
+
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const $ = (sel) => document.querySelector(sel);
+      const ui = {
+        sceneLabel: $("#uiSceneLabel"),
+        panelTitle: $("#uiPanelTitle"),
+        panelMeta: $("#uiPanelMeta"),
+        center: $("#uiCenter"),
+        userBubble: $("#uiUserBubble"),
+        phisherBubble: $("#uiPhisherBubble"),
+        userText: $("#uiUserText"),
+        phisherText: $("#uiPhisherText"),
+        hint: $("#uiHint"),
+        choices: $("#uiChoices"),
+        continueBtn: $("#uiContinueBtn"),
+        homeBtn: $("#uiHomeBtn"),
+        restartBtn: $("#uiRestartBtn"),
+      };
+
+      /* ── Story ── */
+      const STORY = {
+        scenes: [
+          {
+            id: "scene1",
+            label: "Scene 1 – Temptation",
+            steps: [
+              {
+                speaker: "user",
+                text: "I'm browsing the internet and I see a flashy banner:\n🎁 Claim your FREE rewards!",
+                center: { view: "reward" },
+              },
+              {
+                speaker: "user",
+                text: "There's a big shiny button that says CLICK HERE.\nSeems simple enough…",
+                center: { view: "reward", spotlight: "button" },
+              },
+              {
+                speaker: "phisher",
+                text: "That button is not what it looks like…\nI've placed an invisible element right on top of it.",
+                center: { view: "reward", spotlight: "overlay" },
+              },
+            ],
+          },
+          {
+            id: "scene2",
+            label: "Scene 2 – Hidden Trap",
+            steps: [
+              {
+                speaker: "user",
+                text: "I click the button expecting my free rewards…\nBut something else happened behind the scenes.",
+                center: { view: "trap" },
+                effect: "glitch",
+              },
+              {
+                speaker: "phisher",
+                text: "The user thinks they clicked the reward button…\nbut actually clicked something hidden underneath.\n\nThis is called CLICKJACKING.",
+                center: { view: "trap", reveal: true },
+                effect: "glitch",
+              },
+              {
+                speaker: "phisher",
+                text: "Clickjacking is a technique where an attacker overlays an invisible or disguised element over a legitimate button.\n\nThe user sees one thing, but interacts with another.",
+                center: { view: "explain" },
+              },
+            ],
+          },
+          {
+            id: "scene3",
+            label: "Scene 3 – Consequence",
+            steps: [
+              {
+                speaker: "phisher",
+                text: "Here's what one invisible click can do:",
+                center: { view: "consequences" },
+                effect: "glitch",
+              },
+              {
+                speaker: "phisher",
+                text: "One click can give attackers control.\nAnd you'd never even know it happened.",
+                center: { view: "consequences", expanded: true },
+                effect: "glitch",
+              },
+            ],
+          },
+          {
+            id: "scene4",
+            label: "Scene 4 – Lesson",
+            steps: [
+              {
+                speaker: "user",
+                text: "So how do I protect myself from clickjacking?",
+                center: { view: "lesson" },
+                effect: "safePulse",
+              },
+              {
+                speaker: "user",
+                text: "Here are the key defenses:\n- Avoid suspicious offers that seem too good to be true\n- Be careful where you click\n- Check website legitimacy\n- Keep browsers updated",
+                center: { view: "lesson", checklist: true },
+                effect: "safePulse",
+              },
+              {
+                speaker: "user",
+                text: "Clickjacking tricks users into clicking something they never intended.\n\nAlways think before you click.",
+                center: { view: "ending" },
+              },
+            ],
+          },
+        ],
+      };
+
+      /* ── State ── */
+      const state = {
+        sceneId: "scene1",
+        stepIndex: 0,
+        typing: { active: false, target: null, fullText: "", index: 0, timer: null },
+      };
+
+      /* ── Helpers ── */
+      function getScene(id) { return STORY.scenes.find(s => s.id === id); }
+      function getStep() { return getScene(state.sceneId).steps[state.stepIndex]; }
+
+      function jumpTo(sceneId, stepIndex) {
+        state.sceneId = sceneId;
+        state.stepIndex = stepIndex;
+        render();
+      }
+
+      function nextStep() {
+        const scene = getScene(state.sceneId);
+        const next = state.stepIndex + 1;
+        if (next < scene.steps.length) { state.stepIndex = next; render(); return; }
+        const idx = STORY.scenes.findIndex(s => s.id === state.sceneId);
+        const nextScene = STORY.scenes[idx + 1];
+        if (nextScene) { state.sceneId = nextScene.id; state.stepIndex = 0; render(); return; }
+      }
+
+      /* ── Typewriter ── */
+      function clearTyping() {
+        if (state.typing.timer != null) clearTimeout(state.typing.timer);
+        Object.assign(state.typing, { active: false, target: null, fullText: "", index: 0, timer: null });
+      }
+
+      function finishTyping() {
+        if (!state.typing.active || !state.typing.target) return;
+        state.typing.target.textContent = state.typing.fullText;
+        const c = document.createElement("span"); c.className = "typeCursor";
+        state.typing.target.appendChild(c);
+        clearTyping();
+        if (state.sceneId === "scene1" && state.stepIndex === 1) {
+          const clickBtn = document.querySelector(".js-clickjacking-btn");
+          if (clickBtn) clickBtn.disabled = false;
+        }
+        updateContinue();
+      }
+
+      function typeInto(target, text) {
+        clearTyping();
+        Object.assign(state.typing, { active: true, target, fullText: text, index: 0 });
+        target.textContent = "";
+        const tick = () => {
+          if (!state.typing.active) return;
+          const t = state.typing.target, i = state.typing.index;
+          if (i >= state.typing.fullText.length) { finishTyping(); return; }
+          t.textContent += state.typing.fullText.charAt(i);
+          state.typing.index++;
+          const c = document.createElement("span"); c.className = "typeCursor"; t.appendChild(c);
+          state.typing.timer = setTimeout(tick, 14 + Math.floor(Math.random() * 12));
+        };
+        state.typing.timer = setTimeout(tick, 40);
+      }
+
+      /* ── Center Panels ── */
+      function renderReward(center) {
+        const showWarningByDefault = center?.spotlight === "overlay";
+        const isClickHereDialogueStep = state.sceneId === "scene1" && state.stepIndex <= 1;
+        const shouldDisableBtn = isClickHereDialogueStep;
+        ui.center.innerHTML = `
+          <div class="card">
+            <div class="card__hdr">
+              <span class="pill">🎁 Rewards Portal</span>
+              <div class="monoSmall">www.totally-legit-rewards.com</div>
+            </div>
+            <div class="dashboard" style="text-align:center;">
+              <div style="font-size:42px; margin:18px 0;">🎁</div>
+              <div class="balance">Claim your FREE rewards!</div>
+              <div class="balanceSub" style="margin-bottom:18px;">Limited time offer — act now!</div>
+              <div class="story-btn-wrap" style="position:relative; display:inline-block;">
+                <button type="button" class="btn btn--primary js-clickjacking-btn" style="font-size:16px; padding:16px 36px; letter-spacing:0.12em;" ${shouldDisableBtn ? " disabled" : ""}>
+                  CLICK HERE
+                </button>
+                ${center?.spotlight === "overlay" ? '<div style="position:absolute;inset:0;border:2px dashed rgba(255,45,85,0.7);border-radius:999px;background:rgba(255,45,85,0.08);pointer-events:none;"></div>' : ''}
+              </div>
+              <div class="callout callout--danger clickjacking-explanation" style="margin-top:10px;" ${showWarningByDefault ? "" : ' hidden'}>
+                <strong>Hidden overlay detected:</strong> An invisible iframe was positioned above the button. Your click was hijacked and redirected to the attacker's page.
+              </div>
+            </div>
+          </div>`;
+        ui.hint.textContent = center?.spotlight === "overlay"
+          ? "The attacker hides an invisible element over the real button."
+          : "Flashy rewards — but is it really free?";
+      }
+
+      function renderTrap(center) {
+        const reveal = center?.reveal ? `
+          <div class="callout callout--danger" style="margin-top:10px;">
+            <strong>CLICKJACKING:</strong> An invisible iframe was layered on top of the button. Your click was hijacked to perform an action on a different website entirely.
+          </div>` : "";
+        ui.center.innerHTML = `
+          <div class="card">
+            <div class="card__hdr">
+              <span class="pill" style="border-color:rgba(255,45,85,0.4);color:rgba(255,45,85,0.95);">⚠ Click Hijacked</span>
+              <div class="monoSmall">What really happened</div>
+            </div>
+            <div class="dashboard">
+              <div class="callout callout--danger">
+                <strong>Your click was intercepted!</strong><br>
+                You thought you clicked "Claim Rewards" — but an invisible element captured your click instead.
+              </div>
+              <div style="display:grid;gap:8px;margin-top:8px;">
+                <div class="activityRow">
+                  <div class="activityRow__left">
+                    <div class="activityRow__title">What you saw</div>
+                    <div class="activityRow__meta">🎁 "Claim your FREE rewards!"</div>
+                  </div>
+                  <div class="delta delta--ok">VISIBLE</div>
+                </div>
+                <div class="activityRow">
+                  <div class="activityRow__left">
+                    <div class="activityRow__title">What you actually clicked</div>
+                    <div class="activityRow__meta">Hidden iframe / invisible button</div>
+                  </div>
+                  <div class="delta delta--out">HIDDEN</div>
+                </div>
+              </div>
+              ${reveal}
+            </div>
+          </div>`;
+        ui.hint.textContent = "The visible button was a decoy — the real target was invisible.";
+      }
+
+      function renderExplain() {
+        ui.center.innerHTML = `
+          <div class="card">
+            <div class="card__hdr">
+              <span class="pill">📖 What is Clickjacking?</span>
+            </div>
+            <div class="lesson">
+              <div class="callout callout--danger">
+                <strong>Clickjacking</strong> (also called UI Redressing) is an attack where a malicious site loads a target website in a hidden iframe and positions it so that the user's clicks land on invisible elements.
+              </div>
+              <div class="callout">
+                <strong>How it works:</strong><br>
+                1. Attacker creates a page with an enticing button<br>
+                2. A transparent iframe loads a legitimate site on top<br>
+                3. User clicks the visible button but actually interacts with the hidden iframe<br>
+                4. Actions are performed on the legitimate site without user knowledge
+              </div>
+            </div>
+          </div>`;
+        ui.hint.textContent = "Clickjacking exploits visual deception — what you see isn't what you click.";
+      }
+
+      function renderConsequences(center) {
+        const items = [
+          { title: "Accidentally liking a page", icon: "👍", desc: "Social media likes/follows without consent" },
+          { title: "Subscribing to something", icon: "📬", desc: "Paid subscriptions or newsletters" },
+          { title: "Granting permissions", icon: "🔓", desc: "Camera, microphone, or location access" },
+          { title: "Triggering unwanted actions", icon: "⚡", desc: "Purchases, transfers, or account changes" },
+        ];
+        ui.center.innerHTML = `
+          <div class="card">
+            <div class="card__hdr">
+              <span class="pill" style="border-color:rgba(255,45,85,0.4);color:rgba(255,45,85,0.95);">💀 Consequences</span>
+              <div class="monoSmall">What one click can cause</div>
+            </div>
+            <div class="dashboard">
+              <div class="activity">
+                ${items.map(i => `
+                  <div class="activityRow">
+                    <div class="activityRow__left">
+                      <div class="activityRow__title">${i.icon} ${i.title}</div>
+                      <div class="activityRow__meta">${i.desc}</div>
+                    </div>
+                    <div class="delta delta--out">RISK</div>
+                  </div>`).join("")}
+              </div>
+              ${center?.expanded ? '<div class="callout callout--danger" style="margin-top:10px;"><strong>One click can give attackers control.</strong> And you\'d never even know it happened.</div>' : ''}
+            </div>
+          </div>`;
+        ui.hint.textContent = "These consequences are real — and they start with one invisible click.";
+      }
+
+      function renderLesson(center) {
+        ui.center.innerHTML = `
+          <div class="card">
+            <div class="card__hdr">
+              <span class="pill">🛡 Defenses</span>
+              <div class="monoSmall">How to protect yourself</div>
+            </div>
+            <div class="lesson">
+              <div class="callout callout--good">
+                <strong>Clickjacking defense:</strong> Awareness is your first line of protection.
+              </div>
+              ${center?.checklist ? `
+              <div class="card" style="border-color:rgba(217,255,233,0.12);">
+                <div class="card__hdr">
+                  <span class="pill">Defensive actions</span>
+                  <span class="monoSmall">Apply these habits</span>
+                </div>
+                <div class="lesson" style="padding-top:10px;">
+                  <ul class="list">
+                    <li>Avoid suspicious offers that seem too good to be true</li>
+                    <li>Be careful where you click — especially on unfamiliar sites</li>
+                    <li>Check website legitimacy before interacting</li>
+                    <li>Keep browsers updated — modern browsers block many clickjacking attempts</li>
+                  </ul>
+                </div>
+              </div>` : ''}
+            </div>
+          </div>`;
+        ui.hint.textContent = "Defense is awareness: question every flashy offer.";
+      }
+
+      function renderEnding() {
+        // Mark level complete
+        try {
+          const levels = JSON.parse(localStorage.getItem("cyberLevels") || "{}");
+          levels.level2 = true;
+          localStorage.setItem("cyberLevels", JSON.stringify(levels));
+        } catch (e) { }
+        try { localStorage.setItem("clickjacking_complete", "true"); } catch (e) { }
+        levelComplete();
+
+        ui.center.innerHTML = `
+          <div class="card">
+            <div class="card__hdr">
+              <span class="pill">✅ Level 2 Complete</span>
+              <div class="monoSmall">Clickjacking awareness</div>
+            </div>
+            <div class="lesson">
+              <div class="callout callout--good">
+                <strong>Final message:</strong><br>
+                Clickjacking tricks users into clicking something they never intended.<br><br>
+                <strong>Always think before you click.</strong>
+              </div>
+              <div class="callout">
+                Level 2 complete! Return to the menu to continue your training.
+              </div>
+            </div>
+          </div>`;
+        ui.hint.textContent = "✔ Level 2 Complete — Clickjacking.";
+      }
+
+      /* ── Render ── */
+      function renderCenter(step) {
+        const c = step.center || {};
+        if (c.view === "reward") return renderReward(c);
+        if (c.view === "trap") return renderTrap(c);
+        if (c.view === "explain") return renderExplain();
+        if (c.view === "consequences") return renderConsequences(c);
+        if (c.view === "lesson") return renderLesson(c);
+        if (c.view === "ending") return renderEnding();
+      }
+
+      function setEffect(effect) {
+        const appEl = $("#app");
+        appEl.classList.remove("is-compromised", "is-safePulse");
+        if (effect === "glitch") appEl.classList.add("is-compromised");
+        if (effect === "safePulse") {
+          appEl.classList.add("is-safePulse");
+          setTimeout(() => appEl.classList.remove("is-safePulse"), 950);
+        }
+      }
+
+      function renderBubbles(step) {
+        const isUser = step.speaker === "user";
+        ui.userBubble.style.opacity = isUser ? "1" : "0.5";
+        ui.phisherBubble.style.opacity = isUser ? "0.5" : "1";
+        ui.userText.textContent = "";
+        ui.phisherText.textContent = "";
+        typeInto(isUser ? ui.userText : ui.phisherText, step.text);
+      }
+
+      function updateContinue() {
+        if (state.typing.active) {
+          ui.continueBtn.disabled = false;
+          ui.continueBtn.textContent = "Skip";
+          return;
+        }
+        ui.continueBtn.disabled = false;
+        ui.continueBtn.textContent = "Continue";
+      }
+
+      function render() {
+        const step = getStep();
+        const scene = getScene(state.sceneId);
+        ui.sceneLabel.textContent = scene.label;
+        ui.panelTitle.textContent = scene.label.toUpperCase();
+        ui.panelMeta.textContent = `Step ${state.stepIndex + 1}/${scene.steps.length}`;
+
+        if (step.effect === "glitch") setEffect("glitch");
+        else if (step.effect === "safePulse") setEffect("safePulse");
+        else setEffect("none");
+
+        renderCenter(step);
+        renderBubbles(step);
+        updateContinue();
+      }
+
+      function levelComplete() {
+        if (ui.continueBtn) ui.continueBtn.style.display = "none";
+        if (ui.homeBtn) ui.homeBtn.style.display = "inline-block";
+      }
+
+      /* ── Controls ── */
+      ui.continueBtn.addEventListener("click", () => {
+        if (state.typing.active) { finishTyping(); return; }
+        nextStep();
+      });
+
+      ui.restartBtn.addEventListener("click", () => {
+        clearTyping();
+        state.sceneId = "scene1";
+        state.stepIndex = 0;
+        render();
+      });
+
+      if (ui.homeBtn) {
+        ui.homeBtn.addEventListener("click", () => {
+          window.location.href = "index.html";
+        });
+      }
+
+      /* ── Clickjacking button: show warning on click, no reload ── */
+      ui.center.addEventListener("click", (e) => {
+        const btn = e.target.closest(".js-clickjacking-btn");
+        if (!btn || btn.disabled) return;
+        e.preventDefault();
+        const wrap = btn.closest(".story-btn-wrap");
+        const warningBox = wrap ? wrap.parentElement.querySelector(".clickjacking-explanation") : null;
+        if (warningBox) {
+          warningBox.removeAttribute("hidden");
+        }
+        btn.classList.add("clickjacking-clicked");
+        setTimeout(() => btn.classList.remove("clickjacking-clicked"), 650);
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); ui.continueBtn.click(); }
+      });
+
+      /* ── Image fallback ── */
+      function enableImageFallback(imgSel, fbSel) {
+        const img = document.querySelector(imgSel);
+        const fb = document.querySelector(fbSel);
+        if (!img || !fb) return;
+        img.addEventListener("error", () => { img.style.display = "none"; fb.style.display = "block"; });
+      }
+      enableImageFallback(".char--user .char__img", ".char__imgFallback--user");
+      enableImageFallback(".char--phisher .char__img", ".char__imgFallback--phisher");
+
+      render();
+    })();
+  </script>
+</body>
+
+</html>

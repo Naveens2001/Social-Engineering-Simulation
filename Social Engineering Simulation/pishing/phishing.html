@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="A playable interactive story that teaches phishing awareness in the browser. No login, no tracking, no backend." />
+  <title>Level 1 — Phishing Attack</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <div class="app" id="app">
+    <header class="topbar" aria-label="Game header">
+      <div class="topbar__left">
+        <a href="./index.html" class="btn btn--ghost back-btn">← Menu</a>
+        <div class="brand">
+          <div class="brand__title">DON'T GET HOOKED</div>
+          <div class="brand__subtitle">Interactive phishing awareness story</div>
+        </div>
+      </div>
+
+      <div class="topbar__right">
+        <div class="status" aria-live="polite">
+          <div class="status__label">Scene</div>
+          <div class="status__value" id="uiSceneLabel">—</div>
+        </div>
+        <button class="btn btn--ghost" id="uiRestartBtn" type="button">
+          Restart
+        </button>
+      </div>
+    </header>
+
+    <main class="stage" aria-label="Story stage">
+      <div class="scanlines" aria-hidden="true"></div>
+
+      <section class="stage__grid" aria-label="Characters and story panel">
+        <!-- LEFT: User -->
+        <aside class="char char--user" aria-label="User (victim) character">
+          <div class="char__card">
+            <div class="char__name">User</div>
+            <div class="char__sprite" aria-hidden="true">
+              <img class="char__img" src="./support.png" alt="" loading="eager" />
+              <div class="char__imgFallback char__imgFallback--user" title="User"></div>
+            </div>
+            <div class="char__tag">Victim / main character</div>
+          </div>
+
+          <div class="bubble bubble--user" id="uiUserBubble" role="group" aria-label="User dialogue">
+            <div class="bubble__name">User</div>
+            <div class="bubble__text" id="uiUserText"></div>
+          </div>
+        </aside>
+
+        <!-- CENTER: Scene panel -->
+        <section class="panel" aria-label="Interactive scene panel">
+          <div class="panel__top">
+            <div class="panel__title" id="uiPanelTitle">—</div>
+            <div class="panel__meta" id="uiPanelMeta">—</div>
+          </div>
+
+          <div class="panel__body" id="uiCenter"></div>
+        </section>
+
+        <!-- RIGHT: Phisher -->
+        <aside class="char char--phisher" aria-label="Phisher (attacker) character">
+          <div class="char__card char__card--phisher">
+            <div class="char__name char__name--phisher">Phisher</div>
+            <div class="char__sprite" aria-hidden="true">
+              <img class="char__img" src="./hacker.png" alt="" loading="eager" />
+              <div class="char__imgFallback char__imgFallback--phisher" title="Phisher"></div>
+            </div>
+            <div class="char__tag char__tag--phisher">Pretending to be a bank</div>
+          </div>
+
+          <div class="bubble bubble--phisher" id="uiPhisherBubble" role="group" aria-label="Phisher dialogue">
+            <div class="bubble__name">Phisher</div>
+            <div class="bubble__text" id="uiPhisherText"></div>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <footer class="controls" aria-label="Controls">
+      <div class="controls__left">
+        <div class="hint" id="uiHint">
+          Tip: If it feels urgent, pause and verify.
+        </div>
+      </div>
+
+      <div class="controls__right">
+        <div class="choices" id="uiChoices" aria-label="Choices"></div>
+        <button class="btn btn--primary" id="uiContinueBtn" type="button">
+          Continue
+        </button>
+        <button class="btn btn--primary" id="uiHomeBtn" type="button" style="display:none;">
+          Home
+        </button>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Mobile-friendly "inspect link" modal -->
+  <dialog class="modal" id="uiModal" aria-label="Inspection details">
+    <div class="modal__card">
+      <div class="modal__title" id="uiModalTitle">Inspection</div>
+      <div class="modal__body" id="uiModalBody"></div>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" id="uiModalCloseBtn" type="button">
+          Close
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="./script.js" defer></script>
+</body>
+
+</html>
